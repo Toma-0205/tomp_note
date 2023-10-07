@@ -10,7 +10,59 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   </head>
   <body>
+    <div class="py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6 offset-md-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">日記の投稿</h5>
+                <input type="text" v-model="newPost" class="form-control mb-3" placeholder="ここにテキストを入力してください" />
+                <button @click="addPost" class="btn btn-primary">投稿</button>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div v-for="post in posts" :key="post.id" class="p-2 border-bottom">
+                {{ post.content }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      import firebase from 'firebase'
       
+      export default {
+        data() {
+          return {
+            newPost: '',
+            posts: []
+          }
+        },
+        mounted() {
+          const db = firebase.firestore()
+          db.collection('posts').orderBy('timestamp').onSnapshot(snapshot => {
+            this.posts = snapshot.docs.map(doc => ({
+              id: doc.id,
+              content: doc.data().content,
+              timestamp: doc.data().timestamp
+            }))
+          })
+        },
+        methods: {
+          addPost() {
+            const db = firebase.firestore()
+            db.collection('posts').add({
+              content: this.newPost,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            this.newPost = ''
+          }
+        }
+      }
+    </script>
    
   </body>
 </html></b4-1>
